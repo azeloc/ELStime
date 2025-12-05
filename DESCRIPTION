@@ -11,3 +11,5 @@ Encoding: UTF-8
 LazyData: true
 Depends: 
     R (>= 3.5)
+URL: https://github.com/azeloc/ELStime
+BugReports: https://github.com/azeloc/ELStime/issues
