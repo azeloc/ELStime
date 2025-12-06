@@ -6,3 +6,4 @@
 .quarto
 data-raw/idb/raw_data/
 .Rbuildignore
+data-raw/idb/*.pdf
