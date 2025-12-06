@@ -3,29 +3,47 @@ library(tidyverse)
 
 # download_data -----------------------------------------------------------
 
-urls <- stringr::str_glue("https://www.uscourts.gov/sites/default/files/data_tables/fjcs_c5_0331.{seq(2018,2024)}.xlsx")
+urls <- stringr::str_glue(
+  "https://www.uscourts.gov/sites/default/files/data_tables/fjcs_c5_0331.{seq(2018,2024)}.xlsx"
+)
 
 purrr::walk(
   urls,
-  function(u){
+  function(u) {
     httr::GET(
       u,
       httr::write_disk(
         stringr::str_glue("data-raw/idb/raw_data/{basename(u)}"),
         overwrite = TRUE
-      ))
+      )
+    )
   }
 )
 
 # process tables ----------------------------------------------------------
 
-files <- list.files("data-raw/idb/raw_data/", recursive = TRUE, full.names = TRUE, pattern = "fjcs")
+files <- fs::dir_ls("data-raw/idb/raw_data/", regexp = "fjcs")
 
-uscourts_dataset <- purrr::map_dfr(files, function(f){readxl::read_excel(f)[6, c(2,3)] |> mutate(arquivo = f)}) |>
-  purrr::set_names(c("cases_disposed", "median_time", "file")) |>
-  mutate(
-    cases_disposed = as.numeric(cases_disposed),
-    median_time = as.numeric(median_time)
+uscourts_totals <- purrr::map(files, \(f) {
+  nms <- c(
+    "total_cases",
+    "total_median",
+    "nocourt_cases",
+    "nocourt_median",
+    "before_cases",
+    "before_median",
+    "duringafter_cases",
+    "duringafter_median",
+    "during_cases",
+    "during_median"
+  )
+  readxl::read_excel(f, range = "B8:K8", col_names = nms) |>
+    dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
+}) |>
+  purrr::list_rbind(names_to = "file") |>
+  dplyr::mutate(
+    year = stringr::str_extract(file, "\\d{4}(?=\\.xlsx)"),
+    .before = file
   )
 
-usethis::use_data(uscourts_dataset, overwrite = TRUE)
+usethis::use_data(uscourts_totals, overwrite = TRUE)
