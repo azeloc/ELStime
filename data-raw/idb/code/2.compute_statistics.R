@@ -60,7 +60,7 @@ get_statistics <- function(year) {
 }
 
 # Compute statistics for each year
-results <- 2018:2024 |>
+results <- 2018:2025 |>
   purrr::set_names() |>
   purrr::map(get_statistics) |>
   purrr::list_rbind(names_to = "year")
