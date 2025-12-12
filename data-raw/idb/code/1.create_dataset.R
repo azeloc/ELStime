@@ -34,7 +34,9 @@ da_report <- readr::read_delim("data-raw/idb/raw_data/cv88on.txt") |>
   dplyr::filter(filing_date >= "2002-01-01") |>
   dplyr::select(
     disposition_date,
+    docket = DOCKET,
     filing_date,
+    circuit = CIRCUIT,
     time,
     evento,
     evento_competing,
